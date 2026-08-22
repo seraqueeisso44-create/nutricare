@@ -58,7 +58,7 @@ export function AbaCalculo({
     } catch {
       return null
     }
-  }, [formula, peso, altura, idade, sexo, fatorAtividade, fatorEstresse, ajusteCalorico])
+  }, [formula, peso, altura, idade, sexo, fatorAtividade, fatorEstresse, ajusteCalorico, mlg, precisaMlg])
 
   const salvar = () => {
     if (!resultado) { addToast("error", "Verifique os dados (peso obrigatório; MLG para Cunningham/Katch)"); return }
