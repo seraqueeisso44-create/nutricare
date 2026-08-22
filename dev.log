@@ -1,0 +1,32 @@
+
+> dieta-app@1.0.0 dev
+> next dev
+
+   ▲ Next.js 15.5.20
+   - Local:        http://localhost:3000
+   - Network:      http://192.168.1.102:3000
+
+ ✓ Starting...
+ ✓ Ready in 4.6s
+ ○ Compiling / ...
+ ✓ Compiled / in 2.1s (567 modules)
+ GET / 307 in 3093ms
+ ○ Compiling /pacientes ...
+ ✓ Compiled /pacientes in 12.6s (693 modules)
+ GET /pacientes 200 in 123ms
+ GET /pacientes 200 in 294ms
+ GET / 307 in 338ms
+ GET /pacientes 200 in 257ms
+ ○ Compiling /pacientes/[id] ...
+ ✓ Compiled /pacientes/[id] in 9.1s (1808 modules)
+ GET /pacientes/p_1784539980210_g61ed 200 in 11719ms
+ GET /pacientes/p_1784539980210_g61ed 200 in 123ms
+ GET /pacientes/p_1784539980210_g61ed 200 in 196ms
+ ○ Compiling /calculadora ...
+ ✓ Compiled /calculadora in 3.9s (1825 modules)
+ GET /calculadora?paciente=p_1784539980210_g61ed&peso=90&altura=185&idade=24&sexo=masculino&formula=Harris-Benedict+%281984%29&fa=1.55&fe=1&ajuste=0 200 in 4785ms
+ GET /pacientes/p_1784539980210_g61ed 200 in 162ms
+ GET /calculadora 200 in 92ms
+ GET /pacientes 200 in 125ms
+ GET /pacientes/p_1784539980210_g61ed 200 in 459ms
+ GET /calculadora?paciente=p_1784539980210_g61ed&peso=90&altura=185&idade=24&sexo=masculino&formula=Harris-Benedict+%281984%29&fa=1.55&fe=1&ajuste=0 200 in 72ms

@@ -1,0 +1,33 @@
+{
+  "name": "NutriCare — Gestão Nutricional",
+  "short_name": "NutriCare",
+  "description": "Calculadora TACO, prescrição dietética e prontuário de pacientes",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0B1F17",
+  "theme_color": "#0F3D2E",
+  "categories": ["health", "medical", "nutrition"],
+  "lang": "pt-BR",
+  "dir": "ltr",
+  "scope": "/",
+  "prefer_related_applications": false,
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icons/icon.svg",  "sizes": "any",       "type": "image/svg+xml", "purpose": "any" }
+  ],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "Calculadora",
+      "url": "/calculadora",
+      "description": "Abrir calculadora nutricional"
+    },
+    {
+      "name": "Pacientes",
+      "url": "/pacientes",
+      "description": "Lista de pacientes"
+    }
+  ]
+}
