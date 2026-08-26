@@ -132,7 +132,7 @@ export function calcularTMB(
 
     case "Cunningham (1980)":
       if (!mlg) throw new Error("MLG é obrigatório para Cunningham")
-      tmb = 370 + 21.6 * mlg
+      tmb = 500 + 22.4 * mlg
       break
 
     case "Katch-McArdle":

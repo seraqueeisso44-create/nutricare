@@ -108,6 +108,9 @@ function CalculadoraConteudo() {
       const formulaParam = searchParams.get("formula")
       if (formulaParam) setFormula(formulaParam)
       if (!isNaN(fa)) setFatorAtividade(fa)
+      const mlgParam = parseFloat(searchParams.get("mlg") || "0")
+      if (mlgParam > 0) setMlg(mlgParam)
+      const ajusteParam = parseFloat(searchParams.get("ajuste") || "0")
       setStep("tmb")
     }
 
@@ -218,7 +221,8 @@ function CalculadoraConteudo() {
     if (!resultadoGET || !dados.peso || !dados.altura || !dados.idade) return
     const r = calcularTMB(formula, dados.peso, dados.altura, dados.idade, dados.sexo, precisaMlg ? mlg : undefined)
     setResultadoGET(calcularGET(r, fatorAtividade, dados))
-  }, [formula, fatorAtividade, mlg, precisaMlg])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formula, fatorAtividade, mlg, precisaMlg, dados.peso, dados.altura, dados.idade, dados.sexo])
 
   const sn = (v: number | undefined | null) => v ?? 0
   const imc = calcularIMC(dados.peso, dados.altura)

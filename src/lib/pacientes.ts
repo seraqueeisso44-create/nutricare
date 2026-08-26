@@ -154,6 +154,7 @@ export interface RegistroCalculo {
   fatorAtividade: number
   fatorEstresse: number
   ajusteCalorico: number
+  mlg: number
   tmb: number
   get: number
   observacoes: string

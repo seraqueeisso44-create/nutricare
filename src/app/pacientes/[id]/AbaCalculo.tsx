@@ -64,7 +64,7 @@ export function AbaCalculo({
     if (!resultado) { addToast("error", "Verifique os dados (peso obrigatório; MLG para Cunningham/Katch)"); return }
     const reg: RegistroCalculo = {
       id: `ca_${Date.now()}`, data, formula, peso, altura, idade, sexo,
-      fatorAtividade, fatorEstresse, ajusteCalorico, tmb: resultado.tmb, get: resultado.get, observacoes,
+      fatorAtividade, fatorEstresse, ajusteCalorico, mlg, tmb: resultado.tmb, get: resultado.get, observacoes,
     }
     onSalvar([reg, ...registros])
     setObservacoes("")
@@ -76,7 +76,7 @@ export function AbaCalculo({
 
   const linkCalculadora = (r: RegistroCalculo) =>
     `/calculadora?paciente=${paciente.id}&peso=${r.peso}&altura=${r.altura || 0}&idade=${r.idade}&sexo=${r.sexo}` +
-    `&formula=${encodeURIComponent(r.formula)}&fa=${r.fatorAtividade}&fe=${r.fatorEstresse}&ajuste=${r.ajusteCalorico}`
+    `&formula=${encodeURIComponent(r.formula)}&fa=${r.fatorAtividade}&fe=${r.fatorEstresse}&ajuste=${r.ajusteCalorico}&mlg=${r.mlg || 0}`
 
   return (
     <div className="space-y-4">
@@ -106,7 +106,7 @@ export function AbaCalculo({
             <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
               {formula === "Katch-McArdle"
                 ? "Katch-McArdle: TMB = 370 + 21,6 × MLG"
-                : "Cunningham: TMB = 370 + 21,6 × MLG (publicação original: 500 + 22 × LBM)"}
+                : "Cunningham: TMB = 500 + 22,4 × MLG"}
             </p>
           </div>
         )}
