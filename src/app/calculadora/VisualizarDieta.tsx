@@ -58,7 +58,7 @@ function gerarHTML(cardapio: Cardapio, substitutosColecao: Record<string, { alim
 
     return `
       <div class="refeicao-bloco">
-        <div class="refeicao-titulo">${ref.nome}</div>
+        <div class="refeicao-titulo">${ref.horario ? `${ref.horario} — ` : ""}${ref.nome}</div>
         <table class="tabela-alimentos">
           <thead>
             <tr>

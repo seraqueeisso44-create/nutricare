@@ -181,6 +181,7 @@ function CalculadoraConteudo() {
   const [adicionarModalRef, setAdicionarModalRef] = useState<number | null>(null)
   const [editarAlimento, setEditarAlimento] = useState<{ refIdx: number; alimIdx: number } | null>(null)
   const [editQtd, setEditQtd] = useState(0)
+  const [editMedidaQtd, setEditMedidaQtd] = useState(0)
   const [editNome, setEditNome] = useState("")
   const [editBuscaAlimento, setEditBuscaAlimento] = useState("")
   const [editAlimentoNovo, setEditAlimentoNovo] = useState<AlimentoCompleto | null>(null)
@@ -223,6 +224,22 @@ function CalculadoraConteudo() {
     setResultadoGET(calcularGET(r, fatorAtividade, dados))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formula, fatorAtividade, mlg, precisaMlg, dados.peso, dados.altura, dados.idade, dados.sexo])
+
+  useEffect(() => {
+    if (editarAlimento && editMedidaSel) {
+      const novaQtd = Math.round((editMedidaQtd * editMedidaSel.gramas) * 100) / 100
+      if (Math.abs(novaQtd - editQtd) > 0.01) setEditQtd(novaQtd)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editMedidaQtd, editMedidaSel])
+
+  useEffect(() => {
+    if (editarAlimento && editMedidaSel && editMedidaSel.gramas > 0) {
+      const novaMedidaQtd = Math.round((editQtd / editMedidaSel.gramas) * 100) / 100
+      if (Math.abs(novaMedidaQtd - editMedidaQtd) > 0.01) setEditMedidaQtd(novaMedidaQtd)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editQtd, editMedidaSel])
 
   const sn = (v: number | undefined | null) => v ?? 0
   const imc = calcularIMC(dados.peso, dados.altura)
@@ -998,12 +1015,13 @@ function CalculadoraConteudo() {
                                    </button>
                                    <button onClick={(e) => {
                                      e.stopPropagation()
-                                     setEditarAlimento({ refIdx, alimIdx })
-                                     setEditQtd(item.quantidade)
-                                     setEditNome((item as any).customNome || item.alimento.nome)
-                                     setEditAlimentoNovo(null)
-                                     setEditBuscaAlimento("")
-                                     setEditMedidaSel(null)
+                                      setEditarAlimento({ refIdx, alimIdx })
+                                      setEditQtd(item.quantidade)
+                                      setEditMedidaQtd(0)
+                                      setEditNome((item as any).customNome || item.alimento.nome)
+                                      setEditAlimentoNovo(null)
+                                      setEditBuscaAlimento("")
+                                      setEditMedidaSel(null)
                                      setEditMedidasCustom(carregarMedidasCustom(item.alimento.id))
                                      setEditCriandoMedida(false)
                                      setEditNovoNome("")
@@ -1226,7 +1244,7 @@ function CalculadoraConteudo() {
                         <div className="grid grid-cols-2 gap-1 max-h-24 overflow-y-auto border border-gray-100 dark:border-gray-800 rounded-lg p-1">
                           {medidasComCustom.map((med, i) => (
                             <div key={`edit_med_${i}`} className="flex items-center gap-1 group">
-                              <button onClick={() => setEditMedidaSel(med)} title={`${med.gramas}g`}
+                              <button onClick={() => { setEditMedidaSel(med); if (med.gramas > 0) setEditMedidaQtd(Math.round((editQtd / med.gramas) * 100) / 100) }} title={`${med.gramas}g`}
                                 className={`flex-1 text-left px-2 py-1 rounded text-xs transition-all ${editMedidaSel?.rotulo === med.rotulo && editMedidaSel?.gramas === med.gramas
                                   ? 'bg-turquesa/10 text-turquesa font-medium border border-turquesa/30'
                                   : (med as any).custom
@@ -1248,12 +1266,30 @@ function CalculadoraConteudo() {
                         </div>
                       </div>
 
-                      <div>
-                        <label className="text-xs text-gray-500 mb-1 block">Quantidade (g)</label>
-                        <input type="number" value={editQtd} min={1} step={1}
-                          onChange={e => setEditQtd(Math.max(1, parseFloat(e.target.value) || item.quantidade))}
-                          className="w-full h-9 px-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm dark:text-white mb-1" />
-                      </div>
+                      {editMedidaSel ? (
+                        <div className="flex items-end gap-2">
+                          <div className="flex-1">
+                            <label className="text-xs text-gray-500 mb-1 block">Medida caseira ({editMedidaSel.rotulo})</label>
+                            <input type="number" value={editMedidaQtd || ""} min={0.1} step={0.1}
+                              onChange={e => setEditMedidaQtd(Math.max(0.1, parseFloat(e.target.value) || 0.1))}
+                              className="w-full h-9 px-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm dark:text-white" />
+                          </div>
+                          <div className="text-center px-1 pb-2 text-gray-400 text-xs font-bold">=</div>
+                          <div className="flex-1">
+                            <label className="text-xs text-gray-500 mb-1 block">Gramas</label>
+                            <input type="number" value={editQtd} min={0.1} step={0.1}
+                              onChange={e => setEditQtd(Math.max(0.1, parseFloat(e.target.value) || 0.1))}
+                              className="w-full h-9 px-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm dark:text-white" />
+                          </div>
+                        </div>
+                      ) : (
+                        <div>
+                          <label className="text-xs text-gray-500 mb-1 block">Quantidade (g)</label>
+                          <input type="number" value={editQtd} min={0.1} step={0.1}
+                            onChange={e => setEditQtd(Math.max(0.1, parseFloat(e.target.value) || 0.1))}
+                            className="w-full h-9 px-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm dark:text-white" />
+                        </div>
+                      )}
 
                       <div className="flex items-center gap-2 p-2.5 bg-gray-50 dark:bg-gray-800 rounded-lg">
                         <p className="text-xs text-gray-500">
@@ -1677,10 +1713,30 @@ function CalculadoraConteudo() {
                 </div>
 
                 <div>
-                  <label className="text-xs text-gray-500 mb-1 block">Quantidade (g)</label>
-                  <input type="number" value={editSubQtd} min={1} step={1}
-                    onChange={e => setEditSubQtd(Math.max(1, parseFloat(e.target.value) || sub.quantidade))}
-                    className="w-full h-10 px-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm dark:text-white" />
+                  {medidaSel ? (
+                    <div className="flex items-end gap-2">
+                      <div className="flex-1">
+                        <label className="text-xs text-gray-500 mb-1 block">Medida ({medidaSel.rotulo})</label>
+                        <input type="number" value={Math.round((editSubQtd / medidaSel.gramas) * 100) / 100 || ""} min={0.1} step={0.1}
+                          onChange={e => { const v = Math.max(0.1, parseFloat(e.target.value) || 0.1); setEditSubQtd(Math.round(v * medidaSel.gramas * 100) / 100) }}
+                          className="w-full h-10 px-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm dark:text-white" />
+                      </div>
+                      <div className="text-center px-1 pb-2 text-gray-400 text-xs font-bold">=</div>
+                      <div className="flex-1">
+                        <label className="text-xs text-gray-500 mb-1 block">Gramas</label>
+                        <input type="number" value={editSubQtd} min={0.1} step={0.1}
+                          onChange={e => setEditSubQtd(Math.max(0.1, parseFloat(e.target.value) || 0.1))}
+                          className="w-full h-10 px-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm dark:text-white" />
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <label className="text-xs text-gray-500 mb-1 block">Quantidade (g)</label>
+                      <input type="number" value={editSubQtd} min={0.1} step={0.1}
+                        onChange={e => setEditSubQtd(Math.max(0.1, parseFloat(e.target.value) || 0.1))}
+                        className="w-full h-10 px-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm dark:text-white" />
+                    </>
+                  )}
                   {medidaSel && medidaPreview && (
                     <p className="text-xs text-turquesa mt-1">Medida: <strong>{medidaPreview}</strong></p>
                   )}

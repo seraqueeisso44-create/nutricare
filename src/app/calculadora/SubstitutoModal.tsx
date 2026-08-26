@@ -168,7 +168,7 @@ export function SubstitutoModal({ aberto, onClose, onSelecionar, alimentoPrincip
             <div className="flex items-end gap-3">
               <div className="w-28">
               <label className="text-xs text-gray-500 dark:text-gray-400 mb-1 block">Quantidade (g)</label>
-                <input type="number" value={gramas} onChange={e => setGramas(Math.max(1, parseFloat(e.target.value) || 100))}
+                <input type="number" value={gramas} onChange={e => setGramas(Math.max(0.1, parseFloat(e.target.value) || 100))}
                   className="w-full h-9 px-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-gray-900 dark:text-white" />
               </div>
               {sel && (
