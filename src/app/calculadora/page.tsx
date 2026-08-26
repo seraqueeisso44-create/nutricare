@@ -64,6 +64,8 @@ function CalculadoraConteudo() {
   const [formula, setFormula] = useState("Mifflin-St Jeor (1990)")
   const [mlg, setMlg] = useState(0)
   const [fatorAtividade, setFatorAtividade] = useState(1.2)
+  const [fatorEstresse, setFatorEstresse] = useState(1.0)
+  const [ajusteCalorico, setAjusteCalorico] = useState(0)
   const [resultadoGET, setResultadoGET] = useState<ResultadoGET | null>(null)
   const [metodoMacros, setMetodoMacros] = useState<"A" | "B">("A")
   const [gKg, setGkg] = useState({ proteinas: 2, lipidios: 1, carboidratos: 3 })
@@ -108,9 +110,25 @@ function CalculadoraConteudo() {
       const formulaParam = searchParams.get("formula")
       if (formulaParam) setFormula(formulaParam)
       if (!isNaN(fa)) setFatorAtividade(fa)
+      if (!isNaN(fe) && fe > 0) setFatorEstresse(fe)
       const mlgParam = parseFloat(searchParams.get("mlg") || "0")
       if (mlgParam > 0) setMlg(mlgParam)
       const ajusteParam = parseFloat(searchParams.get("ajuste") || "0")
+      if (!isNaN(ajusteParam)) setAjusteCalorico(ajusteParam)
+      const formulaUsada = formulaParam || formula
+      const mlgUsado = mlgParam > 0 ? mlgParam : undefined
+      const dadosFinais = {
+        peso: parseFloat(pesoParam) || 0,
+        altura: parseFloat(searchParams.get("altura") || "0") || 0,
+        idade: parseInt(searchParams.get("idade") || "0", 10) || 0,
+        sexo: (searchParams.get("sexo") as "masculino" | "feminino") || p.sexo,
+        fatorInjuria: (!isNaN(fe) && fe > 0) ? fe : undefined,
+      }
+      setDados(dadosFinais)
+      try {
+        const r = calcularTMB(formulaUsada, dadosFinais.peso, dadosFinais.altura, dadosFinais.idade, dadosFinais.sexo, mlgUsado)
+        setResultadoGET(calcularGET(r, (!isNaN(fa) && fa > 0) ? fa : fatorAtividade, dadosFinais))
+      } catch {}
       setStep("tmb")
     }
 
@@ -220,10 +238,11 @@ function CalculadoraConteudo() {
 
   useEffect(() => {
     if (!resultadoGET || !dados.peso || !dados.altura || !dados.idade) return
+    const dadosComEstresse = { ...dados, fatorInjuria: fatorEstresse > 1 ? fatorEstresse : undefined }
     const r = calcularTMB(formula, dados.peso, dados.altura, dados.idade, dados.sexo, precisaMlg ? mlg : undefined)
-    setResultadoGET(calcularGET(r, fatorAtividade, dados))
+    setResultadoGET(calcularGET(r, fatorAtividade, dadosComEstresse))
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formula, fatorAtividade, mlg, precisaMlg, dados.peso, dados.altura, dados.idade, dados.sexo])
+  }, [formula, fatorAtividade, mlg, precisaMlg, dados.peso, dados.altura, dados.idade, dados.sexo, fatorEstresse])
 
   useEffect(() => {
     if (editarAlimento && editMedidaSel) {
@@ -252,10 +271,13 @@ function CalculadoraConteudo() {
     if (precisaMlg && !mlg) {
       addToast("error", "Informe a Massa Livre de Gordura (MLG) para esta fórmula"); return
     }
+    const dadosComEstresse = { ...dados, fatorInjuria: fatorEstresse > 1 ? fatorEstresse : undefined }
     const r = calcularTMB(formula, dados.peso, dados.altura, dados.idade, dados.sexo, precisaMlg ? mlg : undefined)
-    setResultadoGET(calcularGET(r, fatorAtividade, dados))
+    setResultadoGET(calcularGET(r, fatorAtividade, dadosComEstresse))
     setStep("tmb")
   }
+
+  const getFinal = resultadoGET ? resultadoGET.get + ajusteCalorico : 0
 
   const handleCalcularGET = () => setStep("macros")
 
@@ -265,7 +287,7 @@ function CalculadoraConteudo() {
     if (metodoMacros === "A") {
       resultado = calcularMacrosMetodoA(dados.peso, gKg.proteinas, gKg.lipidios, gKg.carboidratos)
     } else {
-      resultado = calcularMacrosMetodoB(resultadoGET.get, percentMacros.proteinas, percentMacros.lipidios, percentMacros.carboidratos)
+      resultado = calcularMacrosMetodoB(getFinal, percentMacros.proteinas, percentMacros.lipidios, percentMacros.carboidratos)
     }
     setMacrosPrescritas(resultado)
     setStep("cardapio")
@@ -837,18 +859,42 @@ function CalculadoraConteudo() {
                     {fatoresAtividade.map(f => <option key={f.valor} value={f.valor}>{f.rotulo} ({f.valor})</option>)}
                   </select>
                 </div>
+                <div>
+                  <label className="text-xs text-gray-500 mb-1 block">Fator de Estresse / Injúria</label>
+                  <input type="number" value={fatorEstresse} step={0.1} min={1}
+                    onChange={e => { const v = parseFloat(e.target.value); setFatorEstresse(isNaN(v) ? 1 : Math.max(1, v)) }}
+                    className="w-full h-10 px-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm dark:text-white" />
+                  <p className="text-[10px] text-gray-400 mt-0.5">1.0 = sem estresse | 1.2 = trauma | 1.3 = sepse | 1.5 = queimados grave</p>
+                </div>
+                <div>
+                  <label className="text-xs text-gray-500 mb-1 block">Ajuste Calórico (kcal)</label>
+                  <input type="number" value={ajusteCalorico || ""} step={1}
+                    onChange={e => setAjusteCalorico(parseFloat(e.target.value) || 0)}
+                    className="w-full h-10 px-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm dark:text-white" />
+                  <p className="text-[10px] text-gray-400 mt-0.5">Negativo = déficit | Positivo = superávit (1 kg ≈ 7700 kcal)</p>
+                </div>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
                   { label: "TMB", value: `${resultadoGET.tmb.tmb} kcal`, color: "text-petroleo dark:text-turquesa" },
-                  { label: "Fator", value: resultadoGET.fatorAtividade, color: "text-gray-600 dark:text-gray-300" },
-                  { label: "GET Total", value: `${resultadoGET.get} kcal`, color: "text-turquesa font-bold" },
-                  { label: "GET/kg", value: `${resultadoGET.getKg} kcal/kg`, color: "text-gray-500 dark:text-gray-400" },
+                  { label: "Fator", value: `${resultadoGET.fatorAtividade}${fatorEstresse > 1 ? ` × ${fatorEstresse} (estresse)` : ""}`, color: "text-gray-600 dark:text-gray-300" },
+                  { label: "GET Total", value: `${getFinal} kcal`, color: "text-turquesa font-bold" },
+                  { label: "GET/kg", value: `${Math.round(getFinal / dados.peso * 10) / 10} kcal/kg`, color: "text-gray-500 dark:text-gray-400" },
                 ].map(item => (
                   <div key={item.label} className="bg-gray-50 dark:bg-gray-800 rounded-lg p-3 text-center"><p className="text-xs text-gray-500 mb-1">{item.label}</p><p className={`text-lg ${item.color}`}>{item.value}</p></div>
                 ))}
               </div>
-              <p className="text-xs text-gray-400">Fórmula aplicada: <strong>{resultadoGET.tmb.formula}</strong> · TMB: {resultadoGET.tmb.tmb} kcal × FA {resultadoGET.fatorAtividade}</p>
+              {ajusteCalorico !== 0 && (
+                <div className={`flex items-center gap-2 p-2.5 rounded-lg ${ajusteCalorico > 0 ? 'bg-green-50 dark:bg-green-900/20' : 'bg-red-50 dark:bg-red-900/20'}`}>
+                  <p className={`text-sm font-semibold ${ajusteCalorico > 0 ? 'text-green-700 dark:text-green-400' : 'text-red-700 dark:text-red-400'}`}>
+                    {ajusteCalorico > 0 ? '+' : ''}{ajusteCalorico} kcal/dia
+                    {ajusteCalorico > 0 ? ' (superávit)' : ' (déficit)'}
+                    {' · '}
+                    {ajusteCalorico > 0 ? '+' : ''}{(ajusteCalorico / 7700).toFixed(2)} kg/semana
+                  </p>
+                </div>
+              )}
+              <p className="text-xs text-gray-400">Fórmula aplicada: <strong>{resultadoGET.tmb.formula}</strong> · TMB: {resultadoGET.tmb.tmb} kcal × FA {resultadoGET.fatorAtividade}{fatorEstresse > 1 ? ` × Estresse ${fatorEstresse}` : ""}{ajusteCalorico !== 0 ? ` ${ajusteCalorico > 0 ? '+' : ''}${ajusteCalorico} kcal` : ""}</p>
               {resultadoGET.ajustes.length > 0 && (
                 <div className="text-xs text-gray-500"><strong>Ajustes:</strong> {resultadoGET.ajustes.map(a => `${a.nome} (${a.valor}%)`).join(", ")}</div>
               )}
