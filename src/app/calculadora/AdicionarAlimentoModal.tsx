@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { bancoAlimentos, buscarAlimentos, carregarMedidasCustom, criarMedidaCustom, removerMedidaCustom } from "@/lib/alimentos";
 import type { AlimentoCompleto } from "@/lib/alimentos";
 import type { MedidaCaseiraCustom } from "@/lib/alimentos";
-import { Plus, X, Search, Trash2, Ruler } from "lucide-react";
+import { Plus, X, Search, Trash2, Ruler, Pencil } from "lucide-react";
 
 interface MedidaCaseira {
   rotulo: string
@@ -66,6 +66,7 @@ interface Props {
 }
 
 export function AdicionarAlimentoModal({ aberto, onClose, onAdicionar, nomeRefeicao }: Props) {
+  const [modo, setModo] = useState<"buscar" | "criar">("buscar")
   const [busca, setBusca] = useState("")
   const [categoria, setCategoria] = useState("todas")
   const [sel, setSel] = useState<AlimentoCompleto | null>(null)
@@ -75,6 +76,33 @@ export function AdicionarAlimentoModal({ aberto, onClose, onAdicionar, nomeRefei
   const [criando, setCriando] = useState(false)
   const [novoNome, setNovoNome] = useState("")
   const [novoGramas, setNovoGramas] = useState<number>(0)
+
+  const [formNome, setFormNome] = useState("")
+  const [formGramas, setFormGramas] = useState(100)
+  const [formKcal, setFormKcal] = useState(0)
+  const [formProteinas, setFormProteinas] = useState(0)
+  const [formLipidios, setFormLipidios] = useState(0)
+  const [formCarboidratos, setFormCarboidratos] = useState(0)
+  const [formFibras, setFormFibras] = useState(0)
+  const [formSodio, setFormSodio] = useState(0)
+  const [formCalcio, setFormCalcio] = useState(0)
+  const [formFerro, setFormFerro] = useState(0)
+  const [formMagnesio, setFormMagnesio] = useState(0)
+  const [formFosforo, setFormFosforo] = useState(0)
+  const [formPotassio, setFormPotassio] = useState(0)
+  const [formZinco, setFormZinco] = useState(0)
+  const [formSelenio, setFormSelenio] = useState(0)
+  const [formVitA, setFormVitA] = useState(0)
+  const [formVitC, setFormVitC] = useState(0)
+  const [formVitD, setFormVitD] = useState(0)
+  const [formVitE, setFormVitE] = useState(0)
+  const [formVitB1, setFormVitB1] = useState(0)
+  const [formVitB2, setFormVitB2] = useState(0)
+  const [formVitB3, setFormVitB3] = useState(0)
+  const [formVitB6, setFormVitB6] = useState(0)
+  const [formVitB12, setFormVitB12] = useState(0)
+  const [formAcidoFolico, setFormAcidoFolico] = useState(0)
+  const [microsAbertos, setMicrosAbertos] = useState(false)
 
   useEffect(() => {
     if (sel) {
@@ -96,6 +124,14 @@ export function AdicionarAlimentoModal({ aberto, onClose, onAdicionar, nomeRefei
   const reset = () => {
     setBusca(""); setCategoria("todas"); setSel(null); setMedidaSel(null); setMedidaQtd(1)
     setCriando(false); setNovoNome(""); setNovoGramas(0); setMedidasCustom([])
+    setModo("buscar")
+    setFormNome(""); setFormGramas(100); setFormKcal(0); setFormProteinas(0)
+    setFormLipidios(0); setFormCarboidratos(0); setFormFibras(0)
+    setFormSodio(0); setFormCalcio(0); setFormFerro(0); setFormMagnesio(0)
+    setFormFosforo(0); setFormPotassio(0); setFormZinco(0); setFormSelenio(0)
+    setFormVitA(0); setFormVitC(0); setFormVitD(0); setFormVitE(0)
+    setFormVitB1(0); setFormVitB2(0); setFormVitB3(0); setFormVitB6(0)
+    setFormVitB12(0); setFormAcidoFolico(0); setMicrosAbertos(false)
   }
 
   const handleCriar = async () => {
@@ -112,6 +148,42 @@ export function AdicionarAlimentoModal({ aberto, onClose, onAdicionar, nomeRefei
     await removerMedidaCustom(id)
     setMedidasCustom(carregarMedidasCustom(sel?.id || ""))
     if (medidaSel) setMedidaSel(null)
+  }
+
+  const handleAdicionarPersonalizado = () => {
+    if (!formNome.trim() || formGramas <= 0) return
+    const alimento: AlimentoCompleto = {
+      id: `custom_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+      nome: formNome.trim(),
+      origem: "Receita",
+      medidaCaseira: `${formGramas}g`,
+      gramas: formGramas,
+      kcal: formKcal,
+      proteinas: formProteinas,
+      lipidios: formLipidios,
+      carboidratos: formCarboidratos,
+      fibras: formFibras,
+      sodio: formSodio || undefined,
+      calcio: formCalcio || undefined,
+      ferro: formFerro || undefined,
+      magnesio: formMagnesio || undefined,
+      fosforo: formFosforo || undefined,
+      potassio: formPotassio || undefined,
+      zinco: formZinco || undefined,
+      selenio: formSelenio || undefined,
+      vitaminaA: formVitA || undefined,
+      vitaminaC: formVitC || undefined,
+      vitaminaD: formVitD || undefined,
+      vitaminaE: formVitE || undefined,
+      vitaminaB1: formVitB1 || undefined,
+      vitaminaB2: formVitB2 || undefined,
+      vitaminaB3: formVitB3 || undefined,
+      vitaminaB6: formVitB6 || undefined,
+      vitaminaB12: formVitB12 || undefined,
+      acidoFolico: formAcidoFolico || undefined,
+    }
+    onAdicionar(alimento, formGramas, `${formGramas}g (personalizado)`)
+    reset()
   }
 
   if (!aberto) return null
@@ -133,132 +205,255 @@ export function AdicionarAlimentoModal({ aberto, onClose, onAdicionar, nomeRefei
           </button>
         </div>
 
-        <div className="p-4 border-b border-gray-100 dark:border-gray-800 shrink-0 space-y-2">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input type="text" placeholder="Buscar na TACO (597 alimentos)..." value={busca}
-              onChange={e => { setBusca(e.target.value); setSel(null); setMedidaSel(null) }}
-              className="w-full pl-10 pr-4 h-10 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-turquesa dark:text-white" autoFocus />
-          </div>
-          <div className="flex gap-1.5 flex-wrap">
-            {[
-              { key: "todas", label: "Todas" },
-              { key: "Arroz", label: "Cereais" },
-              { key: "Feijão", label: "Leguminosas" },
-              { key: "Frango", label: "Carnes" },
-              { key: "Ovo", label: "Ovos/Laticínios" },
-              { key: "Banana", label: "Frutas" },
-              { key: "Batata", label: "Legumes" },
-              { key: "Azeite", label: "Gorduras" },
-              { key: "Castanha", label: "Oleaginosas" },
-              { key: "Peixe", label: "Peixes" },
-              { key: "Queijo", label: "Queijos" },
-              { key: "Pão", label: "Panificados" },
-              { key: "Leite", label: "Bebidas" },
-            ].map(cat => (
-              <button key={cat.key} onClick={() => setCategoria(cat.key)}
-                className={`px-2.5 py-1 rounded-lg text-xs font-medium ${categoria === cat.key ? 'bg-petroleo text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200'}`}>
-                {cat.label}
-              </button>
-            ))}
-          </div>
+        <div className="flex border-b border-gray-100 dark:border-gray-800 shrink-0">
+          <button onClick={() => setModo("buscar")}
+            className={`flex-1 py-2.5 text-sm font-medium flex items-center justify-center gap-2 transition-colors ${modo === "buscar" ? "text-turquesa border-b-2 border-turquesa" : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"}`}>
+            <Search className="w-4 h-4" /> Buscar na TACO
+          </button>
+          <button onClick={() => setModo("criar")}
+            className={`flex-1 py-2.5 text-sm font-medium flex items-center justify-center gap-2 transition-colors ${modo === "criar" ? "text-turquesa border-b-2 border-turquesa" : "text-gray-500 hover:text-gray-700 dark:hover:text-gray-300"}`}>
+            <Pencil className="w-4 h-4" /> Criar Personalizado
+          </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-3 space-y-1.5">
-          {resultados.slice(0, 60).map(alim => (
-            <button key={alim.id} onClick={() => setSel(alim)}
-              className={`w-full text-left px-3 py-2 rounded-lg text-sm border transition-all ${sel?.id === alim.id ? 'border-turquesa bg-turquesa/10 ring-1 ring-turquesa' : 'border-gray-100 dark:border-gray-700 hover:border-gray-200 dark:hover:border-gray-600'}`}>
-              <div className="flex items-center justify-between">
-                <span className="font-medium text-gray-900 dark:text-white">{alim.nome}</span>
-                <span className="text-xs font-medium text-gray-500">{alim.kcal} kcal</span>
+        {modo === "buscar" ? (
+          <>
+            <div className="p-4 border-b border-gray-100 dark:border-gray-800 shrink-0 space-y-2">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <input type="text" placeholder="Buscar na TACO (597 alimentos)..." value={busca}
+                  onChange={e => { setBusca(e.target.value); setSel(null); setMedidaSel(null) }}
+                  className="w-full pl-10 pr-4 h-10 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm focus:ring-2 focus:ring-turquesa dark:text-white" autoFocus />
               </div>
-              <p className="text-xs text-gray-400">P:{alim.proteinas}g L:{alim.lipidios}g C:{alim.carboidratos}g</p>
-            </button>
-          ))}
-          {resultados.length === 0 && <p className="text-center text-gray-400 py-6 text-sm">Nenhum resultado. Digite pelo menos 2 caracteres.</p>}
-        </div>
-
-        <div className="p-4 border-t border-gray-100 dark:border-gray-800 shrink-0 space-y-3">
-          {sel && (
-            <div>
-              <div className="flex items-center justify-between mb-1">
-                <label className="text-xs text-gray-500">Medida:</label>
-                <button onClick={() => setCriando(!criando)}
-                  className="flex items-center gap-1 text-xs font-medium text-turquesa hover:text-turquesa/80 transition-colors px-2 py-0.5 rounded hover:bg-turquesa/10">
-                  <Ruler className="w-3 h-3" /> Criar medida caseira
-                </button>
-              </div>
-
-              {criando && (
-                <div className="flex items-end gap-2 p-2.5 mb-2 bg-turquesa/5 border border-turquesa/20 rounded-lg">
-                  <div className="flex-1">
-                    <label className="text-[10px] text-gray-500 mb-0.5 block">Nome da medida</label>
-                    <input type="text" value={novoNome} onChange={e => setNovoNome(e.target.value)}
-                      placeholder="Ex: Concha grande, Pires, etc."
-                      className="w-full h-8 px-2 rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xs dark:text-white" />
-                  </div>
-                  <div className="w-20">
-                    <label className="text-[10px] text-gray-500 mb-0.5 block">Gramas</label>
-                    <input type="number" value={novoGramas || ""} onChange={e => setNovoGramas(parseFloat(e.target.value) || 0)}
-                      placeholder="g" min={0} step={1}
-                      className="w-full h-8 px-2 rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xs text-center dark:text-white" />
-                  </div>
-                  <Button size="sm" className="h-8 text-xs" onClick={handleCriar}
-                    disabled={!novoNome.trim() || !novoGramas}>
-                    <Plus className="w-3 h-3" /> Salvar
-                  </Button>
-                </div>
-              )}
-
-              <div className="grid grid-cols-2 gap-1 max-h-28 overflow-y-auto border border-gray-100 dark:border-gray-800 rounded-lg p-1">
-                {todasMedidas.map((med, i) => (
-                  <div key={`${med.custom ? "c" : "s"}_${i}`}
-                    className={`flex items-center gap-1 group ${medidaSel?.rotulo === med.rotulo && medidaSel?.gramas === med.gramas ? '' : ''}`}>
-                    <button onClick={() => setMedidaSel(med)} title={`${med.gramas}g`}
-                      className={`flex-1 text-left px-2 py-1 rounded text-xs transition-all ${medidaSel?.rotulo === med.rotulo && medidaSel?.gramas === med.gramas
-                        ? 'bg-turquesa/10 text-turquesa font-medium border border-turquesa/30'
-                        : med.custom
-                          ? 'hover:bg-amber-50 dark:hover:bg-amber-900/20 text-amber-700 dark:text-amber-400 font-medium border border-amber-200/50 dark:border-amber-700/30'
-                          : 'hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'}`}>
-                      {med.rotulo}
-                    </button>
-                    {med.custom && (
-                      <button onClick={() => handleExcluir(med.customId!)}
-                        className="p-0.5 rounded text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 opacity-0 group-hover:opacity-100 transition-all shrink-0"
-                        title="Excluir medida">
-                        <Trash2 className="w-3 h-3" />
-                      </button>
-                    )}
-                  </div>
+              <div className="flex gap-1.5 flex-wrap">
+                {[
+                  { key: "todas", label: "Todas" },
+                  { key: "Arroz", label: "Cereais" },
+                  { key: "Feijão", label: "Leguminosas" },
+                  { key: "Frango", label: "Carnes" },
+                  { key: "Ovo", label: "Ovos/Laticínios" },
+                  { key: "Banana", label: "Frutas" },
+                  { key: "Batata", label: "Legumes" },
+                  { key: "Azeite", label: "Gorduras" },
+                  { key: "Castanha", label: "Oleaginosas" },
+                  { key: "Peixe", label: "Peixes" },
+                  { key: "Queijo", label: "Queijos" },
+                  { key: "Pão", label: "Panificados" },
+                  { key: "Leite", label: "Bebidas" },
+                ].map(cat => (
+                  <button key={cat.key} onClick={() => setCategoria(cat.key)}
+                    className={`px-2.5 py-1 rounded-lg text-xs font-medium ${categoria === cat.key ? 'bg-petroleo text-white' : 'bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200'}`}>
+                    {cat.label}
+                  </button>
                 ))}
               </div>
             </div>
-          )}
-          <div className="flex items-end gap-3">
-            <div className="w-24">
-              <label className="text-xs text-gray-500 mb-1 block">Qtd</label>
-              <input type="number" value={medidaQtd} min={0.1} step={0.5} onChange={e => setMedidaQtd(Math.max(0.1, parseFloat(e.target.value) || 1))}
-                className="w-full h-9 px-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-center dark:text-white" />
+
+            <div className="flex-1 overflow-y-auto p-3 space-y-1.5">
+              {resultados.slice(0, 60).map(alim => (
+                <button key={alim.id} onClick={() => setSel(alim)}
+                  className={`w-full text-left px-3 py-2 rounded-lg text-sm border transition-all ${sel?.id === alim.id ? 'border-turquesa bg-turquesa/10 ring-1 ring-turquesa' : 'border-gray-100 dark:border-gray-700 hover:border-gray-200 dark:hover:border-gray-600'}`}>
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium text-gray-900 dark:text-white">{alim.nome}</span>
+                    <span className="text-xs font-medium text-gray-500">{alim.kcal} kcal</span>
+                  </div>
+                  <p className="text-xs text-gray-400">P:{alim.proteinas}g L:{alim.lipidios}g C:{alim.carboidratos}g</p>
+                </button>
+              ))}
+              {resultados.length === 0 && <p className="text-center text-gray-400 py-6 text-sm">Nenhum resultado. Digite pelo menos 2 caracteres.</p>}
             </div>
-            {sel && (
-              <div className="flex-1 text-xs text-gray-500 pb-1">
-                <span className="font-medium text-gray-900 dark:text-white">{sel.nome}</span>
-                <p>{(medidaSel?.gramas ?? 0) * medidaQtd}g · {Math.round(sel.kcal * (medidaSel?.gramas ?? sel.gramas) * medidaQtd / sel.gramas)} kcal</p>
+
+            <div className="p-4 border-t border-gray-100 dark:border-gray-800 shrink-0 space-y-3">
+              {sel && (
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-xs text-gray-500">Medida:</label>
+                    <button onClick={() => setCriando(!criando)}
+                      className="flex items-center gap-1 text-xs font-medium text-turquesa hover:text-turquesa/80 transition-colors px-2 py-0.5 rounded hover:bg-turquesa/10">
+                      <Ruler className="w-3 h-3" /> Criar medida caseira
+                    </button>
+                  </div>
+
+                  {criando && (
+                    <div className="flex items-end gap-2 p-2.5 mb-2 bg-turquesa/5 border border-turquesa/20 rounded-lg">
+                      <div className="flex-1">
+                        <label className="text-[10px] text-gray-500 mb-0.5 block">Nome da medida</label>
+                        <input type="text" value={novoNome} onChange={e => setNovoNome(e.target.value)}
+                          placeholder="Ex: Concha grande, Pires, etc."
+                          className="w-full h-8 px-2 rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xs dark:text-white" />
+                      </div>
+                      <div className="w-20">
+                        <label className="text-[10px] text-gray-500 mb-0.5 block">Gramas</label>
+                        <input type="number" value={novoGramas || ""} onChange={e => setNovoGramas(parseFloat(e.target.value) || 0)}
+                          placeholder="g" min={0} step={1}
+                          className="w-full h-8 px-2 rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xs text-center dark:text-white" />
+                      </div>
+                      <Button size="sm" className="h-8 text-xs" onClick={handleCriar}
+                        disabled={!novoNome.trim() || !novoGramas}>
+                        <Plus className="w-3 h-3" /> Salvar
+                      </Button>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-2 gap-1 max-h-28 overflow-y-auto border border-gray-100 dark:border-gray-800 rounded-lg p-1">
+                    {todasMedidas.map((med, i) => (
+                      <div key={`${med.custom ? "c" : "s"}_${i}`}
+                        className={`flex items-center gap-1 group ${medidaSel?.rotulo === med.rotulo && medidaSel?.gramas === med.gramas ? '' : ''}`}>
+                        <button onClick={() => setMedidaSel(med)} title={`${med.gramas}g`}
+                          className={`flex-1 text-left px-2 py-1 rounded text-xs transition-all ${medidaSel?.rotulo === med.rotulo && medidaSel?.gramas === med.gramas
+                            ? 'bg-turquesa/10 text-turquesa font-medium border border-turquesa/30'
+                            : med.custom
+                              ? 'hover:bg-amber-50 dark:hover:bg-amber-900/20 text-amber-700 dark:text-amber-400 font-medium border border-amber-200/50 dark:border-amber-700/30'
+                              : 'hover:bg-gray-50 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'}`}>
+                          {med.rotulo}
+                        </button>
+                        {med.custom && (
+                          <button onClick={() => handleExcluir(med.customId!)}
+                            className="p-0.5 rounded text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 opacity-0 group-hover:opacity-100 transition-all shrink-0"
+                            title="Excluir medida">
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              <div className="flex items-end gap-3">
+                <div className="w-24">
+                  <label className="text-xs text-gray-500 mb-1 block">Qtd</label>
+                  <input type="number" value={medidaQtd} min={0.1} step={0.5} onChange={e => setMedidaQtd(Math.max(0.1, parseFloat(e.target.value) || 1))}
+                    className="w-full h-9 px-2 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm text-center dark:text-white" />
+                </div>
+                {sel && (
+                  <div className="flex-1 text-xs text-gray-500 pb-1">
+                    <span className="font-medium text-gray-900 dark:text-white">{sel.nome}</span>
+                    <p>{(medidaSel?.gramas ?? 0) * medidaQtd}g · {Math.round(sel.kcal * (medidaSel?.gramas ?? sel.gramas) * medidaQtd / sel.gramas)} kcal</p>
+                  </div>
+                )}
+                <Button size="sm" disabled={!sel}
+                  onClick={() => {
+                    if (!sel) return
+                    const gramas = (medidaSel?.gramas ?? sel.gramas) * medidaQtd
+                    const medidaBase = medidaSel?.rotulo ?? `${sel.gramas}g (padrão)`
+                    const medidaTexto = medidaQtd === 1 ? medidaBase : `${medidaQtd}x ${medidaBase}`
+                    onAdicionar(sel, gramas, medidaTexto)
+                    reset()
+                  }}>
+                  <Plus className="w-3.5 h-3.5" /> Adicionar
+                </Button>
+              </div>
+            </div>
+          </>
+        ) : (
+          <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            <div>
+              <label className="text-xs text-gray-500 mb-1 block">Nome do Alimento *</label>
+              <input type="text" value={formNome} onChange={e => setFormNome(e.target.value)}
+                placeholder="Ex: Shake proteico, Granola caseira, Suco natural..."
+                className="w-full h-10 px-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm dark:text-white" autoFocus />
+            </div>
+
+            <div>
+              <label className="text-xs text-gray-500 mb-1 block">Referência (gramas) *</label>
+              <input type="number" value={formGramas} min={1} step={1}
+                onChange={e => setFormGramas(Math.max(1, parseFloat(e.target.value) || 100))}
+                className="w-full h-10 px-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm dark:text-white" />
+              <p className="text-[10px] text-gray-400 mt-0.5">Todos os valores abaixo são para esta quantidade em gramas</p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-xs text-gray-500 mb-1 block">Calorias (kcal) *</label>
+                <input type="number" value={formKcal || ""} min={0} step={0.1}
+                  onChange={e => setFormKcal(parseFloat(e.target.value) || 0)}
+                  className="w-full h-10 px-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm dark:text-white" />
+              </div>
+              <div>
+                <label className="text-xs text-gray-500 mb-1 block">Fibras (g)</label>
+                <input type="number" value={formFibras || ""} min={0} step={0.1}
+                  onChange={e => setFormFibras(parseFloat(e.target.value) || 0)}
+                  className="w-full h-10 px-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-sm dark:text-white" />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-3 gap-3">
+              {[
+                { label: "Proteínas (g)", value: formProteinas, set: setFormProteinas, color: "border-turquesa/30" },
+                { label: "Lipídios (g)", value: formLipidios, set: setFormLipidios, color: "border-amber-500/30" },
+                { label: "Carboidratos (g)", value: formCarboidratos, set: setFormCarboidratos, color: "border-petroleo/30" },
+              ].map(macro => (
+                <div key={macro.label}>
+                  <label className="text-xs text-gray-500 mb-1 block">{macro.label} *</label>
+                  <input type="number" value={macro.value || ""} min={0} step={0.1}
+                    onChange={e => macro.set(parseFloat(e.target.value) || 0)}
+                    className={`w-full h-10 px-3 rounded-lg border ${macro.color} dark:border-gray-700 bg-white dark:bg-gray-800 text-sm dark:text-white`} />
+                </div>
+              ))}
+            </div>
+
+            <div className="flex items-center justify-between">
+              <button onClick={() => setMicrosAbertos(!microsAbertos)}
+                className="text-xs font-medium text-turquesa hover:text-turquesa/80 transition-colors">
+                {microsAbertos ? "− Ocultar micronutrientes" : "+ Adicionar micronutrientes (opcional)"}
+              </button>
+              {(formSodio + formCalcio + formFerro + formMagnesio + formFosforo + formPotassio + formZinco + formSelenio + formVitA + formVitC + formVitD + formVitE + formVitB1 + formVitB2 + formVitB3 + formVitB6 + formVitB12 + formAcidoFolico > 0) && (
+                <span className="text-[10px] text-turquesa bg-turquesa/10 px-2 py-0.5 rounded-full">preenchidos</span>
+              )}
+            </div>
+
+            {microsAbertos && (
+              <div className="space-y-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700">
+                <p className="text-[10px] text-gray-400 mb-2">Valores por {formGramas}g (mesma referência acima)</p>
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { label: "Sódio (mg)", v: formSodio, s: setFormSodio },
+                    { label: "Cálcio (mg)", v: formCalcio, s: setFormCalcio },
+                    { label: "Ferro (mg)", v: formFerro, s: setFormFerro },
+                    { label: "Magnésio (mg)", v: formMagnesio, s: setFormMagnesio },
+                    { label: "Fósforo (mg)", v: formFosforo, s: setFormFosforo },
+                    { label: "Potássio (mg)", v: formPotassio, s: setFormPotassio },
+                    { label: "Zinco (mg)", v: formZinco, s: setFormZinco },
+                    { label: "Selênio (mcg)", v: formSelenio, s: setFormSelenio },
+                    { label: "Vit A (mcg)", v: formVitA, s: setFormVitA },
+                    { label: "Vit C (mg)", v: formVitC, s: setFormVitC },
+                    { label: "Vit D (mcg)", v: formVitD, s: setFormVitD },
+                    { label: "Vit E (mg)", v: formVitE, s: setFormVitE },
+                    { label: "Vit B1 (mg)", v: formVitB1, s: setFormVitB1 },
+                    { label: "Vit B2 (mg)", v: formVitB2, s: setFormVitB2 },
+                    { label: "Vit B3 (mg)", v: formVitB3, s: setFormVitB3 },
+                    { label: "Vit B6 (mg)", v: formVitB6, s: setFormVitB6 },
+                    { label: "Vit B12 (mcg)", v: formVitB12, s: setFormVitB12 },
+                    { label: "Ácido Fólico (mcg)", v: formAcidoFolico, s: setFormAcidoFolico },
+                  ].map(m => (
+                    <div key={m.label}>
+                      <label className="text-[10px] text-gray-500 mb-0.5 block">{m.label}</label>
+                      <input type="number" value={m.v || ""} min={0} step={0.1}
+                        onChange={e => m.s(parseFloat(e.target.value) || 0)}
+                        className="w-full h-8 px-2 rounded border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-xs dark:text-white" />
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
-            <Button size="sm" disabled={!sel}
-              onClick={() => {
-                if (!sel) return
-                const gramas = (medidaSel?.gramas ?? sel.gramas) * medidaQtd
-                const medidaBase = medidaSel?.rotulo ?? `${sel.gramas}g (padrão)`
-                const medidaTexto = medidaQtd === 1 ? medidaBase : `${medidaQtd}x ${medidaBase}`
-                onAdicionar(sel, gramas, medidaTexto)
-                reset()
-              }}>
-              <Plus className="w-3.5 h-3.5" /> Adicionar
+
+            <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-gray-100 dark:border-gray-700">
+              <div className="text-center">
+                <p className="text-xs text-gray-500">Total</p>
+                <p className="text-lg font-bold text-turquesa">{formKcal} kcal</p>
+              </div>
+              <div className="text-xs text-gray-400 flex-1">
+                P: <span className="font-medium text-gray-700 dark:text-gray-300">{formProteinas}g</span> · L: <span className="font-medium text-gray-700 dark:text-gray-300">{formLipidios}g</span> · C: <span className="font-medium text-gray-700 dark:text-gray-300">{formCarboidratos}g</span>
+                {formFibras > 0 && <> · Fib: <span className="font-medium text-gray-700 dark:text-gray-300">{formFibras}g</span></>}
+              </div>
+            </div>
+
+            <Button className="w-full" disabled={!formNome.trim() || formGramas <= 0}
+              onClick={handleAdicionarPersonalizado}>
+              <Plus className="w-4 h-4" /> Adicionar Alimento Personalizado
             </Button>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
