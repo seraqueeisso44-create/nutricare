@@ -1,7 +1,7 @@
 "use client";
 import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { bancoAlimentos, buscarAlimentos, carregarMedidasCustom, criarMedidaCustom, removerMedidaCustom } from "@/lib/alimentos";
+import { bancoAlimentos, buscarAlimentos, carregarMedidasCustom, criarMedidaCustom, removerMedidaCustom, salvarAlimentoCustom, removerAlimentoCustom, carregarAlimentosCustom } from "@/lib/alimentos";
 import type { AlimentoCompleto } from "@/lib/alimentos";
 import type { MedidaCaseiraCustom } from "@/lib/alimentos";
 import { Plus, X, Search, Trash2, Ruler, Pencil } from "lucide-react";
@@ -103,6 +103,7 @@ export function AdicionarAlimentoModal({ aberto, onClose, onAdicionar, nomeRefei
   const [formVitB12, setFormVitB12] = useState(0)
   const [formAcidoFolico, setFormAcidoFolico] = useState(0)
   const [microsAbertos, setMicrosAbertos] = useState(false)
+  const [customSalvos, setCustomSalvos] = useState<AlimentoCompleto[]>([])
 
   useEffect(() => {
     if (sel) {
@@ -114,6 +115,10 @@ export function AdicionarAlimentoModal({ aberto, onClose, onAdicionar, nomeRefei
       setNovoGramas(0)
     }
   }, [sel])
+
+  useEffect(() => {
+    setCustomSalvos(carregarAlimentosCustom())
+  }, [aberto])
 
   const resultados = useMemo(() => {
     const base = busca.length >= 2 ? buscarAlimentos(busca) : bancoAlimentos
@@ -182,8 +187,15 @@ export function AdicionarAlimentoModal({ aberto, onClose, onAdicionar, nomeRefei
       vitaminaB12: formVitB12 || undefined,
       acidoFolico: formAcidoFolico || undefined,
     }
+    salvarAlimentoCustom(alimento)
+    setCustomSalvos(carregarAlimentosCustom())
     onAdicionar(alimento, formGramas, `${formGramas}g (personalizado)`)
     reset()
+  }
+
+  const handleExcluirAlimentoCustom = (id: string) => {
+    removerAlimentoCustom(id)
+    setCustomSalvos(carregarAlimentosCustom())
   }
 
   if (!aberto) return null
@@ -251,14 +263,26 @@ export function AdicionarAlimentoModal({ aberto, onClose, onAdicionar, nomeRefei
 
             <div className="flex-1 overflow-y-auto p-3 space-y-1.5">
               {resultados.slice(0, 60).map(alim => (
-                <button key={alim.id} onClick={() => setSel(alim)}
-                  className={`w-full text-left px-3 py-2 rounded-lg text-sm border transition-all ${sel?.id === alim.id ? 'border-turquesa bg-turquesa/10 ring-1 ring-turquesa' : 'border-gray-100 dark:border-gray-700 hover:border-gray-200 dark:hover:border-gray-600'}`}>
-                  <div className="flex items-center justify-between">
-                    <span className="font-medium text-gray-900 dark:text-white">{alim.nome}</span>
-                    <span className="text-xs font-medium text-gray-500">{alim.kcal} kcal</span>
-                  </div>
-                  <p className="text-xs text-gray-400">P:{alim.proteinas}g L:{alim.lipidios}g C:{alim.carboidratos}g</p>
-                </button>
+                <div key={alim.id} className={`relative group`}>
+                  <button onClick={() => setSel(alim)}
+                    className={`w-full text-left px-3 py-2 rounded-lg text-sm border transition-all ${sel?.id === alim.id ? 'border-turquesa bg-turquesa/10 ring-1 ring-turquesa' : alim.origem === 'Receita' ? 'border-amber-200/50 dark:border-amber-700/30 hover:border-amber-300 dark:hover:border-amber-600 bg-amber-50/30 dark:bg-amber-900/10' : 'border-gray-100 dark:border-gray-700 hover:border-gray-200 dark:hover:border-gray-600'}`}>
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-gray-900 dark:text-white">{alim.nome}</span>
+                      <span className="text-xs font-medium text-gray-500">{alim.kcal} kcal</span>
+                    </div>
+                    <p className="text-xs text-gray-400">P:{alim.proteinas}g L:{alim.lipidios}g C:{alim.carboidratos}g</p>
+                    {alim.origem === 'Receita' && (
+                      <span className="inline-block mt-0.5 text-[10px] text-amber-600 dark:text-amber-400 bg-amber-100/50 dark:bg-amber-900/30 px-1.5 py-0.5 rounded">Personalizado</span>
+                    )}
+                  </button>
+                  {alim.origem === 'Receita' && (
+                    <button onClick={(e) => { e.stopPropagation(); handleExcluirAlimentoCustom(alim.id) }}
+                      className="absolute right-2 top-2 p-1 rounded text-gray-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 opacity-0 group-hover:opacity-100 transition-all"
+                      title="Excluir alimento personalizado">
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  )}
+                </div>
               ))}
               {resultados.length === 0 && <p className="text-center text-gray-400 py-6 text-sm">Nenhum resultado. Digite pelo menos 2 caracteres.</p>}
             </div>

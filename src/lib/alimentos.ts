@@ -661,16 +661,20 @@ export const bancoAlimentos: AlimentoCompleto[] = [
 ]
 
 export function buscarAlimentos(termo: string): AlimentoCompleto[] {
+  const custom = carregarAlimentosCustom()
+  const todos = [...custom, ...bancoAlimentos]
   const q = termo.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-  return bancoAlimentos.filter(a =>
+  return todos.filter(a =>
     a.nome.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(q)
   )
 }
 
 export function encontrarSubstitutos(alimento: AlimentoCompleto, limite = 5): AlimentoCompleto[] {
   if (!alimento.kcal || !alimento.gramas) return []
+  const custom = carregarAlimentosCustom()
+  const todos = [...custom, ...bancoAlimentos]
   const kcalAlvo = alimento.kcal / alimento.gramas
-  return bancoAlimentos
+  return todos
     .filter(a => a.id !== alimento.id && a.kcal && Math.abs((a.kcal / a.gramas) - kcalAlvo) < 1.5)
     .sort((a, b) => Math.abs((b.kcal! / b.gramas) - kcalAlvo) - Math.abs((a.kcal! / a.gramas) - kcalAlvo))
     .slice(0, limite)
@@ -799,5 +803,43 @@ export function rotuloMedidaPorGramas(gramas: number, medida: { rotulo: string; 
   if (!medida.gramas) return `${gramas}g`
   const qtd = Math.round((gramas / medida.gramas) * 10) / 10
   return qtd === 1 ? medida.rotulo : `${qtd}x ${medida.rotulo}`
+}
+
+// ===== ALIMENTOS PERSONALIZADOS =====
+
+const ALIMENTOS_CUSTOM_STORAGE = "nutricare_alimentos_custom"
+
+export function carregarAlimentosCustom(): AlimentoCompleto[] {
+  if (!isBrowser()) return []
+  try {
+    const raw = localStorage.getItem(ALIMENTOS_CUSTOM_STORAGE)
+    if (!raw) return []
+    return JSON.parse(raw)
+  } catch {
+    return []
+  }
+}
+
+export function salvarAlimentoCustom(alimento: AlimentoCompleto): void {
+  if (!isBrowser()) return
+  const todos = carregarAlimentosCustom()
+  const existentes = todos.filter(a => a.id !== alimento.id)
+  existentes.push(alimento)
+  localStorage.setItem(ALIMENTOS_CUSTOM_STORAGE, JSON.stringify(existentes))
+}
+
+export function removerAlimentoCustom(id: string): void {
+  if (!isBrowser()) return
+  const todos = carregarAlimentosCustom()
+  localStorage.setItem(ALIMENTOS_CUSTOM_STORAGE, JSON.stringify(todos.filter(a => a.id !== id)))
+}
+
+export function buscarAlimentosComCustom(termo: string): AlimentoCompleto[] {
+  const custom = carregarAlimentosCustom()
+  const todos = [...custom, ...bancoAlimentos]
+  const q = termo.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+  return todos.filter(a =>
+    a.nome.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").includes(q)
+  )
 }
 
