@@ -11,10 +11,11 @@ export async function GET(request: Request) {
     const supabase = await createClient()
     const { error } = await supabase.auth.exchangeCodeForSession(code)
     if (!error) {
-      if (type === "recovery") {
-        return NextResponse.redirect(`${origin}/redefinir-senha`)
-      }
-      return NextResponse.redirect(`${origin}${next}`)
+      const redirectUrl = type === "recovery"
+        ? `${origin}/redefinir-senha`
+        : `${origin}${next}`
+      const response = NextResponse.redirect(redirectUrl)
+      return response
     }
   }
 

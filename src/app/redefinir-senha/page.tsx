@@ -19,8 +19,27 @@ export default function RedefinirSenhaPage() {
   const supabase = createClient()
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSessionOk(!!session)
+    const handleHashTokens = async () => {
+      const hash = window.location.hash
+      if (hash && hash.includes("access_token")) {
+        const params = new URLSearchParams(hash.substring(1))
+        const accessToken = params.get("access_token")
+        const refreshToken = params.get("refresh_token")
+
+        if (accessToken && refreshToken) {
+          await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          })
+          window.history.replaceState({}, "", "/redefinir-senha")
+        }
+      }
+    }
+
+    handleHashTokens().then(() => {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        setSessionOk(!!session)
+      })
     })
   }, [supabase])
 

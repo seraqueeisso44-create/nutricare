@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/layout/ThemeProvider"
 import { RegisterSW } from "@/components/RegisterSW"
 import { CookieBanner } from "@/components/CookieBanner"
 import { AuthProvider } from "@/contexts/AuthContext"
+import { RecoveryHandler } from "@/components/RecoveryHandler"
 
 const inter = Inter({ subsets: ["latin"], weight: ["400", "500", "600", "700"] })
 
@@ -92,6 +93,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={inter.className}>
         <ThemeProvider>
           <AuthProvider>
+            <RecoveryHandler />
             <RegisterSW />
             <ToastProvider>
               {children}

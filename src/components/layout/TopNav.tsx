@@ -1,12 +1,15 @@
 "use client"
 import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { LayoutDashboard, Calculator, Apple, Sun, Moon, Cloud } from "lucide-react"
+import { usePathname, useRouter } from "next/navigation"
+import { LayoutDashboard, Calculator, Apple, Sun, Moon, Cloud, LogOut } from "lucide-react"
 import { useTheme } from "./ThemeProvider"
+import { useAuth } from "@/contexts/AuthContext"
 
 export function TopNav() {
   const pathname = usePathname()
+  const router = useRouter()
   const { theme, toggle } = useTheme()
+  const { user, signOut } = useAuth()
   const links = [
     { href: "/pacientes", label: "Pacientes", icon: LayoutDashboard },
     { href: "/calculadora", label: "Calculadora", icon: Calculator },
@@ -60,6 +63,13 @@ export function TopNav() {
             title={theme === "light" ? "Modo escuro" : "Modo claro"}>
             {theme === "light" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />}
           </button>
+          {user && (
+            <button onClick={() => signOut().then(() => router.push("/login"))}
+              className="flex items-center justify-center w-9 h-9 rounded-xl text-white/60 hover:text-white hover:bg-white/10 transition-all duration-200"
+              title="Sair">
+              <LogOut className="w-4 h-4" />
+            </button>
+          )}
         </nav>
       </div>
     </header>
