@@ -28,6 +28,8 @@ const DRI: { rotulo: string; key: string | null; unidade: string; dri: number }[
   { rotulo: "Vitamina E", key: "vitaminaE", unidade: "mg", dri: 15 },
   { rotulo: "Tiamina", key: "vitaminaB1", unidade: "mg", dri: 1.2 },
   { rotulo: "Zinco", key: "zinco", unidade: "mg", dri: 11 },
+  { rotulo: "Manganês", key: "manganes", unidade: "mg", dri: 2.3 },
+  { rotulo: "Cobre", key: "cobre", unidade: "mg", dri: 0.9 },
 ]
 
 export function TabelaMicros({ refeicoes }: Props) {

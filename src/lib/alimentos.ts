@@ -659,7 +659,8 @@ export const bancoAlimentos: AlimentoCompleto[] = [
   { id:"a632", nome:"Mamão", origem:"TACO", medidaCaseira:"100g", gramas:100, kcal:43, proteinas:0.5, lipidios:0.3, carboidratos:10.8, fibras:1.7, calcio:20, ferro:0.3, sodio:8, potassio:182 },
   { id:"a633", nome:"Macarrão cozido", origem:"TACO", medidaCaseira:"100g", gramas:100, kcal:131, proteinas:5, lipidios:1.1, carboidratos:25, fibras:1.8, calcio:7, ferro:0.5, sodio:6, potassio:44 },
   { id:"a634", nome:"Feijão preto cozido", origem:"TACO", medidaCaseira:"100g", gramas:100, kcal:77, proteinas:4.5, lipidios:0.5, carboidratos:14, fibras:8.4, calcio:29, ferro:1.5, sodio:2, potassio:256 },
-  { id:"a635", nome:"Feijão macassar (feijão de corda) cozido", origem:"TACO", medidaCaseira:"100g", gramas:100, kcal:76, proteinas:6, lipidios:0.5, carboidratos:13, fibras:6, calcio:30, ferro:1.7, sodio:2, potassio:240 }
+  { id:"a635", nome:"Feijão macassar (feijão de corda) cozido", origem:"TACO", medidaCaseira:"100g", gramas:100, kcal:76, proteinas:6, lipidios:0.5, carboidratos:13, fibras:6, calcio:30, ferro:1.7, sodio:2, potassio:240 },
+  { id:"a636", nome:"Semente de chia", origem:"TACO", medidaCaseira:"100g", gramas:100, kcal:486, proteinas:16.5, lipidios:30.7, carboidratos:42.1, fibras:34.4, sodio:16, calcio:631, ferro:7.7, magnesio:335, fosforo:860, potassio:407, zinco:4.6, selenio:55, vitaminaA:54, vitaminaC:1.6, vitaminaE:0.5, vitaminaB1:0.62, vitaminaB2:0.17, vitaminaB3:8.83, acidoFolico:49, manganes:2.72, cobre:1 }
 ]
 
 export function buscarAlimentos(termo: string): AlimentoCompleto[] {
