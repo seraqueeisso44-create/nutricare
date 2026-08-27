@@ -52,18 +52,7 @@ export async function POST(request: Request) {
       billing_address_collection: "auto",
       line_items: [
         {
-          price_data: {
-            currency: "brl",
-            product_data: {
-              name: `NutriCare — Plano ${planoConfig.name}`,
-              description: planoConfig.description,
-            },
-            unit_amount: planoConfig.price,
-            recurring: {
-              interval: planoConfig.interval,
-              interval_count: planoConfig.intervalCount,
-            },
-          },
+          price: planoConfig.priceId,
           quantity: 1,
         },
       ],

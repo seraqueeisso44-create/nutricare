@@ -12,6 +12,7 @@ export function getStripe(): Stripe {
 export const PLANOS = {
   monthly: {
     name: "Mensal",
+    priceId: "price_1U8unqHCY3eRKCWkcqB15DFY",
     price: 2500,
     interval: "month" as const,
     intervalCount: 1,
@@ -20,6 +21,7 @@ export const PLANOS = {
   },
   quarterly: {
     name: "Trimestral",
+    priceId: "price_1U8unqHCY3eRKCWkcbXtmwRU",
     price: 6750,
     interval: "month" as const,
     intervalCount: 3,
@@ -29,6 +31,7 @@ export const PLANOS = {
   },
   semester: {
     name: "Semestral",
+    priceId: "price_1U8unrHCY3eRKCWku2fcFS4f",
     price: 12750,
     interval: "month" as const,
     intervalCount: 6,
@@ -38,6 +41,7 @@ export const PLANOS = {
   },
   annual: {
     name: "Anual",
+    priceId: "price_1U8unrHCY3eRKCWk2fGFD06I",
     price: 24000,
     interval: "year" as const,
     intervalCount: 1,
