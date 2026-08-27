@@ -19,6 +19,8 @@ export interface AlimentoCompleto extends Alimento {
   vitaminaB6?: number
   vitaminaB12?: number
   acidoFolico?: number
+  manganes?: number
+  cobre?: number
 }
 
 export const bancoAlimentos: AlimentoCompleto[] = [

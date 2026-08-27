@@ -102,6 +102,8 @@ export function AdicionarAlimentoModal({ aberto, onClose, onAdicionar, nomeRefei
   const [formVitB6, setFormVitB6] = useState(0)
   const [formVitB12, setFormVitB12] = useState(0)
   const [formAcidoFolico, setFormAcidoFolico] = useState(0)
+  const [formManganes, setFormManganes] = useState(0)
+  const [formCobre, setFormCobre] = useState(0)
   const [microsAbertos, setMicrosAbertos] = useState(false)
   const [customSalvos, setCustomSalvos] = useState<AlimentoCompleto[]>([])
 
@@ -136,7 +138,7 @@ export function AdicionarAlimentoModal({ aberto, onClose, onAdicionar, nomeRefei
     setFormFosforo(0); setFormPotassio(0); setFormZinco(0); setFormSelenio(0)
     setFormVitA(0); setFormVitC(0); setFormVitD(0); setFormVitE(0)
     setFormVitB1(0); setFormVitB2(0); setFormVitB3(0); setFormVitB6(0)
-    setFormVitB12(0); setFormAcidoFolico(0); setMicrosAbertos(false)
+    setFormVitB12(0);     setFormAcidoFolico(0); setFormManganes(0); setFormCobre(0); setMicrosAbertos(false)
   }
 
   const handleCriar = async () => {
@@ -186,6 +188,8 @@ export function AdicionarAlimentoModal({ aberto, onClose, onAdicionar, nomeRefei
       vitaminaB6: formVitB6 || undefined,
       vitaminaB12: formVitB12 || undefined,
       acidoFolico: formAcidoFolico || undefined,
+      manganes: formManganes || undefined,
+      cobre: formCobre || undefined,
     }
     salvarAlimentoCustom(alimento)
     setCustomSalvos(carregarAlimentosCustom())
@@ -421,7 +425,7 @@ export function AdicionarAlimentoModal({ aberto, onClose, onAdicionar, nomeRefei
                 className="text-xs font-medium text-turquesa hover:text-turquesa/80 transition-colors">
                 {microsAbertos ? "− Ocultar micronutrientes" : "+ Adicionar micronutrientes (opcional)"}
               </button>
-              {(formSodio + formCalcio + formFerro + formMagnesio + formFosforo + formPotassio + formZinco + formSelenio + formVitA + formVitC + formVitD + formVitE + formVitB1 + formVitB2 + formVitB3 + formVitB6 + formVitB12 + formAcidoFolico > 0) && (
+              {(formSodio + formCalcio + formFerro + formMagnesio + formFosforo + formPotassio + formZinco + formSelenio + formVitA + formVitC + formVitD + formVitE + formVitB1 + formVitB2 + formVitB3 + formVitB6 + formVitB12 + formAcidoFolico + formManganes + formCobre > 0) && (
                 <span className="text-[10px] text-turquesa bg-turquesa/10 px-2 py-0.5 rounded-full">preenchidos</span>
               )}
             </div>
@@ -449,6 +453,8 @@ export function AdicionarAlimentoModal({ aberto, onClose, onAdicionar, nomeRefei
                     { label: "Vit B6 (mg)", v: formVitB6, s: setFormVitB6 },
                     { label: "Vit B12 (mcg)", v: formVitB12, s: setFormVitB12 },
                     { label: "Ácido Fólico (mcg)", v: formAcidoFolico, s: setFormAcidoFolico },
+                    { label: "Manganês (mg)", v: formManganes, s: setFormManganes },
+                    { label: "Cobre (mg)", v: formCobre, s: setFormCobre },
                   ].map(m => (
                     <div key={m.label}>
                       <label className="text-[10px] text-gray-500 mb-0.5 block">{m.label}</label>
