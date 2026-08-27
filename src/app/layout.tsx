@@ -5,6 +5,7 @@ import { ToastProvider } from "@/components/ui/toast"
 import { ThemeProvider } from "@/components/layout/ThemeProvider"
 import { RegisterSW } from "@/components/RegisterSW"
 import { CookieBanner } from "@/components/CookieBanner"
+import { AuthProvider } from "@/contexts/AuthContext"
 
 const inter = Inter({ subsets: ["latin"], weight: ["400", "500", "600", "700"] })
 
@@ -90,11 +91,13 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       </head>
       <body className={inter.className}>
         <ThemeProvider>
-          <RegisterSW />
-          <ToastProvider>
-            {children}
-            <CookieBanner />
-          </ToastProvider>
+          <AuthProvider>
+            <RegisterSW />
+            <ToastProvider>
+              {children}
+              <CookieBanner />
+            </ToastProvider>
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>
