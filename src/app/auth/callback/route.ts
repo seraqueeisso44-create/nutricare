@@ -1,11 +1,15 @@
 import { createClient } from "@/lib/supabase/server"
 import { NextResponse } from "next/server"
 
+const ALLOWED_REDIRECTS = ["/assinatura", "/calculadora", "/pacientes", "/redefinir-senha", "/login", "/"]
+
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get("code")
-  const next = searchParams.get("next") ?? "/assinatura"
+  const next = searchParams.get("next")
   const type = searchParams.get("type")
+
+  const safeNext = next && ALLOWED_REDIRECTS.includes(next) ? next : "/calculadora"
 
   if (code) {
     const supabase = await createClient()
@@ -13,9 +17,8 @@ export async function GET(request: Request) {
     if (!error) {
       const redirectUrl = type === "recovery"
         ? `${origin}/redefinir-senha`
-        : `${origin}${next}`
-      const response = NextResponse.redirect(redirectUrl)
-      return response
+        : `${origin}${safeNext}`
+      return NextResponse.redirect(redirectUrl)
     }
   }
 

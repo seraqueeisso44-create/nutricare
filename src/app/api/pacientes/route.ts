@@ -1,46 +1,47 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getSupabase } from "@/lib/supabase"
+import { createClient } from "@/lib/supabase/server"
 
-// GET /api/pacientes?id=xxx (optional)
 export async function GET(req: NextRequest) {
-  const sb = getSupabase()
-  if (!sb) return NextResponse.json({ error: "Supabase not configured" }, { status: 503 })
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 
   const id = req.nextUrl.searchParams.get("id")
   if (id) {
-    const { data, error } = await sb.from("pacientes").select("*").eq("id", id).single()
+    const { data, error } = await supabase.from("pacientes").select("*").eq("id", id).single()
     if (error) return NextResponse.json({ error: error.message }, { status: 404 })
     return NextResponse.json(mapFromDb(data))
   }
 
-  const { data, error } = await sb.from("pacientes").select("*").order("criado_em", { ascending: false })
+  const { data, error } = await supabase.from("pacientes").select("*").order("criado_em", { ascending: false })
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json((data || []).map(mapFromDb))
 }
 
-// POST /api/pacientes  (body = Paciente)
 export async function POST(req: NextRequest) {
-  const sb = getSupabase()
-  if (!sb) return NextResponse.json({ error: "Supabase not configured" }, { status: 503 })
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
   const body = await req.json()
-  const row = mapToDb(body)
-  const { error } = await sb.from("pacientes").upsert(row, { onConflict: "id" })
+  const row = mapToDb(body) as Record<string, unknown>
+  row.user_id = user.id
+  const { error } = await supabase.from("pacientes").upsert(row, { onConflict: "id" })
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ ok: true })
 }
 
-// DELETE /api/pacientes?id=xxx
 export async function DELETE(req: NextRequest) {
-  const sb = getSupabase()
-  if (!sb) return NextResponse.json({ error: "Supabase not configured" }, { status: 503 })
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
   const id = req.nextUrl.searchParams.get("id")
   if (!id) return NextResponse.json({ error: "id required" }, { status: 400 })
-  const { error } = await sb.from("pacientes").delete().eq("id", id)
+  const { error } = await supabase.from("pacientes").delete().eq("id", id).eq("user_id", user.id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ ok: true })
 }
-
-/* --- mapping between camelCase (app) and snake_case (DB) --- */
 
 function mapFromDb(r: Record<string, unknown>) {
   return {

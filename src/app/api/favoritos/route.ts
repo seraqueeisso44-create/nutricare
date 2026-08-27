@@ -1,22 +1,24 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getSupabase } from "@/lib/supabase"
+import { createClient } from "@/lib/supabase/server"
 
-// GET /api/favoritos
 export async function GET() {
-  const sb = getSupabase()
-  if (!sb) return NextResponse.json({ error: "Supabase not configured" }, { status: 503 })
-  const { data, error } = await sb.from("favoritos_substitutos").select("grupos").limit(1).single()
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
+  const { data, error } = await supabase.from("favoritos_substitutos").select("grupos").eq("user_id", user.id).limit(1).single()
   if (error && error.code !== "PGRST116") return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json(data?.grupos || [])
 }
 
-// PUT /api/favoritos  (body = GrupoFavoritoSub[])
 export async function PUT(req: NextRequest) {
-  const sb = getSupabase()
-  if (!sb) return NextResponse.json({ error: "Supabase not configured" }, { status: 503 })
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+
   const grupos = await req.json()
-  const { error } = await sb.from("favoritos_substitutos").upsert({
-    id: 1, chave: "default", grupos, atualizado_em: new Date().toISOString(),
+  const { error } = await supabase.from("favoritos_substitutos").upsert({
+    id: 1, chave: "default", grupos, user_id: user.id, atualizado_em: new Date().toISOString(),
   }, { onConflict: "id" })
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
   return NextResponse.json({ ok: true })
